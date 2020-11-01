@@ -1,0 +1,735 @@
+---
+title: "Lista 3"
+author: "Germano Andrade Brandão - 2017080008"
+date: "19/04/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(ggpubr)
+library(knitr)
+```
+
+## Nota inicial
+Para a resolução dos exercícios, foram utilizados os pacotes "ggplot2" (para construção de gráficos) e "knitr" (para utilização da função "kable()").
+
+# Capítulo 2
+
+### Questão 9
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 2/Questão_9-a.PNG")
+```
+```{r}
+Identif <- c("Qualitativa Ordinal", "Qualitativa Nominal", "Quantitativa Contínua")
+Variav <- c("Seção", "Administr.", "Direito", "Redação", "Estatíst.", "Inglês", "Metodologia", "Política", "Economia")
+Classif <- data.frame(Variáveis = Variav, Classificação = Identif[c(2, 3, 3, 3, 3, 1, 1, 3, 3)], stringsAsFactors = FALSE)
+kable(Classif, format = "markdown")
+```
+
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 2/Questão_9-b.PNG")
+```
+
+*  Analisando o *Gráfico das Frequências das Notas por curso*, percebemos que as notas de $Direito$ não variam, permanecendo no 9. Já as de $Política$ variam pouco, e acima de 6; e as de $Estatística$ estão mais distribuídas pelo gráfico, indo desde a menor nota observada entre os três cursos, 4, e obtendo 3 vezes a nota máxima, 10.
+```{r}
+Direito <- rep(9, 25)
+Politica <- c(9,	6.5,	9,	6,	6.5,	6.5,	9,	6,	10,	9,	10,	6.5,	6,	10,	10,	9,	10,	6,	6,	6,	6.5,	6,	9,	6.5,	9)
+Estatist <- c(9,	9,	8,	8,	9,	10,	8,	8,	9,	8,	10,	7,	7,	9,	9,	7,	8,	9,	4,	7,	7,	8,	10,	9,	9)
+
+Notas <- data.frame("Faixa_de_Notas" = c("Entre 4 e 5", "Entre 5 e 6", "Entre 6 e 7", "Entre 7 e 8", "Entre 8 e 9", "Entre 9 e 10", "Igual a 10"),"Direito" = c(length(Direito[Direito==4]), length(Direito[Direito==5]), length(Direito[Direito==6]), length(Direito[Direito==7]), length(Direito[Direito==8]), length(Direito[Direito==9]), length(Direito[Direito==10])), "Estatística" = c(length(Estatist[Estatist==4]), length(Estatist[Estatist==5]), length(Estatist[Estatist==6]), length(Estatist[Estatist==7]), length(Estatist[Estatist==8]), length(Estatist[Estatist==9]), length(Estatist[Estatist==10])), "Política" = c(length(Politica[Politica==4]), length(Politica[Politica==5]), length(Politica[Politica==6])+ length(Politica[Politica==6.5]), length(Politica[Politica==7]), length(Politica[Politica==8]), length(Politica[Politica==9]), length(Politica[Politica==10])), stringsAsFactors = FALSE)
+#Frequência de Notas por curso:
+kable(Notas, format = "markdown")
+```
+
+```{r}
+Frequencia <- c(1, 5, 7, 9, 3, 13, 7, 5, 25)
+Estat <- c(4.85,7.85, 8.85, 9.85, 10.85)
+Polit <- c(6.5, 9.5, 10.5)
+Direit <- c(9.15)
+Variavs <- c(Estat, Polit, Direit)
+Leg <- c(rep("Estatística",5), rep("Política",3), "Direito")
+
+ggplot(data = NULL, aes(x = Variavs, y = Frequencia, fill = Leg)) +
+  geom_bar(col = "navy",stat = "identity", position = "identity", orientation = Variavs)  +
+  scale_x_continuous(breaks = seq(5,11), limits = c(4.7,11)) +
+  scale_y_continuous(breaks = c(seq(0,21,3), 25)) +
+  geom_text(aes(label = Frequencia), vjust = -0.3, size = 3.5) +
+  theme(panel.background = element_rect(fill = "white"), panel.grid.major.x = element_line(colour = "gray50" ,linetype = "dashed"), panel.grid.major.y = element_line(colour = "powderblue" ,linetype = "longdash")) +
+  labs(title = "Gráfico das Frequências das Notas por curso", x = "Notas", y= "Frequência", fill = "Curso")
+```
+
+
+
+```{r , echo=FALSE, out.width = '65%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 2/Questão_9-c.PNG")
+```
+```{r}
+Reda <- data.frame("Redação" = c(8.6, 7, 8, 8.6, 8, 8.5, 8.2, 7.5, 9.4, 7.9, 8.6, 8.3, 7, 8.6, 8.6, 9.5, 6.3, 7.6, 6.8, 7.5, 7.7, 8.7, 7.3, 8.5, 7))
+kable(Reda, align = 'c')
+```
+```{r, warning=FALSE}
+ggplot(data = Reda, aes(Reda$Redação)) + geom_histogram(fill = "limegreen",col = "navy",breaks = seq(6.3,9.5, 0.8)) + theme_classic() + labs(title = "Histograma para as notas da variável Redação", x = "Notas", y = "Frequência")
+```
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 2/Questão_9-d.PNG")
+```
+```{r}
+kable(data.frame("Funcionário" = seq(1,25,1), "Metodologia" = c("A", "C", "B", "C", "A", "A", "C", "C", "B", "C", "B", "B", "C", "B", "B", "A", "C", "C", "C", "B", "B", "A", "C", "A", "A"), stringsAsFactors = FALSE), align = 'cc')
+```
+```{r}
+Metodol <- c("A", "C", "B", "C", "A", "A", "C", "C", "B", "C", "B", "B", "C", "B", "B", "A", "C", "C", "C", "B", "B", "A", "C", "A", "A")
+Frequencia_ni <- c(length(Metodol[Metodol=="A"]),length(Metodol[Metodol=="B"]),length(Metodol[Metodol=="C"]))
+Frequencia_fi <- Frequencia_ni/length(Metodol)
+Porcentagem_100fi <- Frequencia_fi*100
+Distr <- matrix(c(Frequencia_ni, Frequencia_fi, Porcentagem_100fi), nrow = 3, ncol=3, dimnames = list(c("A", "B", "C"), c("Frequência ni","Frequência fi","Porcentagem 100fi")))
+Distr <- rbind(Distr, colSums(Distr[,1:3]))
+row.names(Distr)[4] <- "Total"
+#Distribuição de Frequências
+kable(Distr, format = "markdown", align = 'c')
+```
+```{r}
+ggplot(data = NULL, aes(x=c("A", "B", "C"), y = Frequencia_ni)) + geom_bar(fill = "purple4",stat = "identity") + labs(title = "Distribuição da variável Metodologia", x= "Metodologia", y = "Frequência ni")+
+  geom_text(aes(label=Frequencia_ni), vjust=-0.3, size=3.5) + theme_classic()
+```
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 2/Questão_9-e.PNG")
+```
+```{r}
+#Resposta
+```
+
+*  Temos, ao todo, 7 funcionários que obtiveram grau $A$ em um universo de $25$ funcionários. Portanto, a probabilidade é de $\dfrac{7}{25}=0,28$ ou $28\%$.
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 2/Questão_9-f.PNG")
+```
+```{r}
+#Resposta
+```
+
+*  Menor, pois a probabilidade seria $\dfrac{7}{25}\cdot\dfrac{6}{24}=\dfrac{42}{600}=\dfrac{21}{300}=\dfrac{7}{100}=0,07$ ou $7\%$
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 2/Questão_9-g.PNG")
+```
+
+*  Na seção $P$ temos média:
+```{r}
+Estatist <- c(9,9,	8,	8,	9,	10,	8,	8,	9,	8,	10,	7,	7,	9,	9,	7,	8,	9,	4,	7,	7,	8,	10,	9,	9)
+mean(Estatist[1:7])
+```
+
+*  Para a seção $T$, temos média:
+```{r}
+mean(Estatist[8:14])
+```
+
+*  Já para a seção $V$, temos média:
+```{r}
+mean(Estatist[15:25])
+```
+
+```{r}
+#Resposta
+```
+
+*  Logo, o aproveitamento da seção $P\gt T\gt V$.
+
+# Capítulo 3
+
+### Questão 32
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_32_1.PNG")
+```
+```{r , echo=FALSE, out.width = '66%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_32_2.PNG")
+```
+```{r}
+Cidade <- c("A", "B", "C", "D", "E", "F", "G", "H", "I", "J")
+Invest <- c(20, 16, 14, 8, 19, 15, 14, 16, 19, 18)
+Valores_Obtidos <- matrix(c(Invest), nrow = 1, ncol = 10, byrow = TRUE, dimnames = list("Investimento", Cidade))
+#Valores obtidos
+
+kable(Valores_Obtidos, format = "markdown")
+```
+
+
+
+```{r}
+#Média inicial
+M_Inicial <- mean(Valores_Obtidos)
+M_Inicial
+
+#Desvio Padrão (Populacional), foi preciso fazer algumas alteraçações pelo fato de a função calcular o desvio amostral.
+Desv.Pad <- sd(Valores_Obtidos)*((length(Valores_Obtidos)-1)/length(Valores_Obtidos))^(1/2)
+Desv.Pad
+
+#Agora, vamos pegar os valores menos os que são maiores que a média mais duas vezes o desvio padrão:
+Abaixo <- Valores_Obtidos[Valores_Obtidos<=(M_Inicial+2*Desv.Pad)]
+Abaixo
+#E os valores que são maiores que a média menos duas vezes o desvio padrão:
+Acima <- Valores_Obtidos[Valores_Obtidos>=(M_Inicial-2*Desv.Pad)]
+Acima
+
+#E, por fim, teremos como novo conjunto os valores que estão tanto em "Acima" quanto em "Abaixo" desses dois conjutos obtidos, e assim tiramos a média:
+Novo_Conj <- Acima[Acima %in% Abaixo]
+Novo_Conj
+mean(Novo_Conj)
+```
+
+
+```{r , include=FALSE, out.width = '80%'}
+### Questão 33
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_33.PNG")
+```
+
+```{r, include=FALSE}
+Repart_A <- c(18, 27, 33, 33, 39, 48, 5)
+Repart_B <- c(18, 23, 32, 33, 42, 48, 10)
+Reparticao <- matrix(c(Repart_A, Repart_B), nrow = 2, ncol = 7, byrow = TRUE, dimnames = list(c("A", "B"), c("Mínimo", "1º Quartil", "Mediana", "Média", "3º Quartil", "Máximo", "dp")))
+Reparticao
+```
+
+
+```{r , include=FALSE, fig.cap= "[1]Histogramas no tamanho normal no final da lista."}
+#Analisando os histogramas alisados, pode-se perceber que a distribuição da Repatição A é mais simetrica que a Repartição B, os dados se distribuem de forma mais homogenênea em relação ao centro. Já na B, os dados são mais concentrados à esquerda do gráfico.
+Rep_A <- ggplot(data = data.frame(x = c(Reparticao["A", "Mínimo"], Reparticao["A", "Máximo"])), aes(x)) +
+  stat_function(fun = dnorm, n = 100, args = list(mean = Reparticao["A", "Média"], sd = Reparticao["A", "dp"]), col = "red", size = 1.5) +
+  scale_y_continuous(breaks = NULL, name = " ") +
+  scale_x_continuous(breaks = c(18,27,33,39,48), labels = c("18 - Mínimo", "27 - 1° Quartil", "33 - Mediana", "39 - 3° Quartil", "48 - Máximo"), name = " ") +
+  labs(title = "Histograma alisado para a Repartição A") +
+  theme(panel.grid = element_line(linetype = "longdash", color = "gray37"), panel.background = element_rect(fill = "white"), axis.text.x = element_text(angle = -40))
+
+Rep_B <- ggplot(data = data.frame(x = c(Reparticao["B", "Mínimo"], Reparticao["B", "Máximo"])), aes(x)) +
+  stat_function(fun = dnorm, n = 100, args = list(mean = Reparticao["B", "Média"], sd = Reparticao["B", "dp"]), col = "red", size = 1.5) +
+  scale_y_continuous(breaks = NULL, name = " ") +
+  scale_x_continuous(breaks = c(18,23,32,42,48), labels = c("18 - Mínimo", "23 - 1° Quartil", "32 - Mediana", "42 - 3° Quartil", "48 - Máximo"), name = " ") +
+  labs(title = "Histograma alisado para a Repartição B") +
+  theme(panel.grid = element_line(linetype = "longdash", color = "gray37"), panel.background = element_rect(fill = "white"), axis.text.x = element_text(angle = -40))
+
+ggarrange(Rep_A, Rep_B,
+          ncol = 2, nrow = 2, heights = 2, vjust = -5)
+```
+
+
+```{r , include=FALSE, out.width = '80%'}
+### Questão 34
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_34.PNG")
+```
+
+```{r , include=FALSE}
+Reg_A <- c(20.00, 4.00, 20.32, 20.15, 17.32, 22.68, 8.00, 32.00)
+Reg_B <- c(20.00, 6.00, 18.00, 17.00, 16.00, 24.00, 14.00, 42.00)
+Regioes <- matrix(c(Reg_A, Reg_B), nrow = 2, ncol = 8, byrow = TRUE, dimnames = list(c("A", "B"), c("Média", "dp", "Mediana", "Moda", "q1", "q3", "x1", "xn")))
+Regioes  
+```
+```{r , include=FALSE, fig.cap= "[2]Histogramas no tamanho normal no final da lista."}
+Hist_Reg_A <- ggplot(data = data.frame(x = c(Regioes["A", "x1"], Regioes["A", "xn"])), aes(x)) +
+  stat_function(fun = dnorm, n = 100, args = list(mean = Regioes["A", "Média"], sd = Regioes["A", "dp"]), col = "red", size = 1.5) +
+  scale_y_continuous(breaks = NULL, name = " ") +
+  scale_x_continuous(breaks = c(8,17.32,20.32,22.68,32), labels = c("8,00 - x1", "17,32 - q1", "20,32 - Mediana", "22,68 - q3", "32,00 - xn"), name = " ") +
+  labs(title = "Histograma alisado para a Região A") +
+  theme(panel.grid = element_line(linetype = "longdash", color = "gray37"), panel.background = element_rect(fill = "white"), axis.text.x = element_text(angle = -40))
+
+
+Hist_Reg_B <- ggplot(data = data.frame(x = c(Regioes["B", "x1"], Regioes["B", "xn"])), aes(x)) +
+  stat_function(fun = dnorm, n = 100, args = list(mean = Regioes["B", "Média"], sd = Regioes["B", "dp"]), col = "red", size = 1.5) +
+  scale_y_continuous(breaks = NULL, name = " ") +
+  scale_x_continuous(breaks = c(14,16,18,24,42), labels = c("14-x1", "16-q1", "18-Mediana", "24-q3", "42-xn"), name = " ") +
+  labs(title = "Histograma alisado para a Região B") +
+  theme(panel.grid = element_line(linetype = "longdash", color = "gray37"), panel.background = element_rect(fill = "white"), axis.text.x = element_text(angle = -40))
+
+ggarrange(Hist_Reg_A, Hist_Reg_B,
+          ncol = 2, nrow = 2, heights = 2, widths = 15, vjust = -5)
+```
+
+### Questão 37
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_37_1.PNG")
+```
+```{r , echo=FALSE, out.width = '70%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_37-a.PNG")
+```
+```{r}
+#Resposta
+```
+
+*  Essa nota padronizada $Z$ pode ser interpretada como uma medida de distância em relação à nota média do grupo ao qual o aluno pertence, ou seja, serve para observar  se determinado aluno obteve nota próxima ou distante da nota média da turma.
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_37-b.PNG")
+```
+$$Z=\dfrac{X-\bar{x}}{dp(X)}.$$
+```{r}
+Media_Est <-  mean(Estatist)
+Media_Est
+#A fim de obter o Desvio Padrão Populacional, pelo fato de a função "sd" do R calcular o Desvio Padrão Amostral, isto é, baseado no calculo da variância levando em conta "n-1" observações, foi preciso multiplicar o Desvio pela raiz quadrada de "n-1/n" observações:
+dp_Est <- sd(Estatist)*((length(Estatist)-1)/length(Estatist))^(1/2)
+dp_Est
+
+Notas_Padr <- (Estatist - Media_Est)/dp_Est
+Notas_Padr <- round(Notas_Padr, digits = 2)
+Notas_Padr <- matrix(data = Notas_Padr, ncol = 1, nrow = 25, dimnames = list(seq(1,25,1), "Estatística"))
+Notas_Padr
+```
+```{r , echo=FALSE, out.width = '55%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_37-c.PNG")
+```
+```{r}
+#Temos como média das notas padronizadas:
+mean(Notas_Padr)
+#E como  Desvio Padrão (Populacional):
+dp_z <- sd(Notas_Padr)*((length(Notas_Padr)-1)/length(Notas_Padr))^(1/2)
+dp_z
+```
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_37-d.PNG")
+```
+```{r}
+#Para notas acima de 2dp(Z), não temos nenhuma ocorrência:
+Notas_Padr[Notas_Padr>(2*dp_z)]
+#Já para valores abaixo de -2dp(Z), obtemos uma nota:
+sub_2dp_z <- Notas_Padr[Notas_Padr<(-(2*dp_z))]
+sub_2dp_z
+#E podemos observar que se refere ao funcionário 19:
+row.names(Notas_Padr)[Notas_Padr[,1]==sub_2dp_z]
+```
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 3/Questão_37-e.PNG")
+```
+
+*  Como o funcionário obteve notas iguais, vamos analisar o seu desempenho em relação às médias de cada curso, ou seja, utilizando a nota padronizada $Z$ de _desempenho relativo_.
+```{r}
+#Em Direito:
+#Como todas as notas em direito foram iguais a 9, a média será nove, e não vai haver desvio. Portanto, chegaremos em 9-9/0 = 0/0.
+
+#Em Estatística:
+#Já foi calculado no item (b) e é igual a:
+Notas_Padr[1,]
+
+#Em Política
+(9 - mean(Politica))/sd(Politica)*((length(Politica)-1)/length(Politica))^(1/2)
+```
+* Então, temos que $0\lt0,6\lt0,72$$\iff$$Direito\lt Estatística\lt Política$. Portanto, o _desempenho relativo_ do funcionário ${\bf1}$ foi melhor em **Política**.
+
+# Capítulo 4
+
+### Questão 19
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_19-a.PNG")
+```
+```{r}
+A_Favor <- c(30, 35, 35)
+Contra <- c(60, 25, 15)
+Total_C <- A_Favor + Contra
+Amostra <- matrix(data = c(A_Favor, Contra, Total_C), nrow = 3, ncol = 3, byrow = TRUE, dimnames = list(c("A Favor", "Contra", "Total"), c("Urbano", "Suburbano", "Rural")))
+Amostra <- cbind(Amostra, rowSums(Amostra[1:3,]))
+colnames(Amostra)[4] <- "Total"
+kable(Amostra, format = "markdown", align = 'ccccc')
+```
+
+
+
+
+
+```{r}
+Propor <- matrix(data = c(Amostra[1,]/Amostra[3,], Amostra[2,]/Amostra[3,], Amostra[3,]/Amostra[3,]), nrow = 3, ncol = 4, byrow = TRUE, dimnames = list(c("A Favor", "Contra", "Total"), c("Urbano", "Suburbano", "Rural", "Total")))
+#Proporções em relação ao total das colunas:
+kable(Propor, format = "markdown", align = 'c')
+```
+
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_19-b.PNG")
+```
+```{r}
+#Resposta
+```
+
+* A opinião parece ter uma relação de dependência com o local de residência, já que os valores dos totais das linhas não se repetem no interior da tabela.
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_19-c.PNG")
+```
+
+* Calcularemos o $\chi^2$:
+$$\chi^2 = \sum{\dfrac{(o_i-e_i)^2}{e_i}}$$     $$o_i = valor \hspace{0,17cm} observado;\hspace{0,17cm} e_i = valor \hspace{0,17cm} esperado;$$
+```{r}
+#Obtemos como resutado:
+chisq.test(Amostra)
+```
+```{r , include=FALSE}
+L1 <- (((Amostra[1,1:3] - Amostra[1,4]*Amostra[3,1:3]/Amostra[3,4])^2)/(Amostra[1,4]*Amostra[3,1:3]/Amostra[3,4]))
+
+L2 <- (((Amostra[2,1:3] - Amostra[2,4]*Amostra[3,1:3]/Amostra[3,4])^2)/(Amostra[2,4]*Amostra[3,1:3]/Amostra[3,4]))
+L1
+L2
+#Qui-Quadrado:
+sum(L1, L2)
+```
+
+### Questão 20
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_20.PNG")
+```
+```{r}
+Estat <- c(5, 141, 51, 197)
+Partic <- c(92, 231, 48, 371)
+Total_C <- Estat + Partic
+Ativid <- matrix(data = c(Estat, Partic, Total_C), nrow = 3, ncol = 4, byrow = TRUE, dimnames = list(c("Estatal", "Particular", "Total"), c("Costeira", "Fluvial", "Internacional", "Total")))
+kable(Ativid, align = 'c')
+```
+
+* Pode-se perceber, a partir da análise do $\chi^2$, que parece existir associação entre o tipo de atividade e o tipo de propriedade.
+```{r , message=FALSE}
+chisq.test(Ativid)
+```
+
+### Questão 22
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_22-1.PNG")
+```
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_22-a.PNG")
+```
+```{r}
+Sim <- c(200, 220, 380, 800)
+Nao <- c(200, 280, 720, 1200)
+Tenden <- matrix(data = c(Sim, Nao), ncol = 4, nrow = 2, byrow = TRUE, dimnames = list(c("Sim", "Não"), c("Alta", "Média", "Baixa", "Total")))
+Tenden <- rbind(Tenden, colSums(Tenden[,1:4]))
+row.names(Tenden)[3] <- "Total"
+#Tabela
+kable(Tenden)
+```
+
+
+##### Proporções em relação às colunas:
+```{r}
+Prop_Tenden <- matrix(data = c(Tenden[1,]/Tenden[3,], Tenden[2,]/Tenden[3,], Tenden[3,]/Tenden[3,]), ncol = 4, nrow = 3, byrow = TRUE, dimnames = list(c("Sim", "Não", "Total"), c("Alta", "Média", "Baixa", "Total")))
+kable(Prop_Tenden, format = "markdown", align = 'c')
+```
+```{r}
+#Resposta
+```
+
+*  Não. Percebemos que as respostas da classe "Alta" até se distribuem igualmente, mas as outras classes não reproduzem esse comportamento. Portanto, as respostas _afirmativas_ e _negativas_ se distribuem de forma desigual.
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_22-b.PNG")
+```
+
+##### Usamos o $\chi^2$ como medida quantificadora: 
+$$\chi^2 = \sum{\dfrac{(o_i-e_i)^2}{e_i}}$$
+```{r}
+chisq.test(Tenden)
+```
+##### Obtivemos um valor do $\chi^2$ de $33,636$, o que nos indica que sim, há dependência entre os dois fatores.
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_22-c.PNG")
+```
+
+* Em relação ao resultado da tabela original, dessa vez obtivemos um $\chi^2$ de $15,438$, o que quer dizer que a dependência entre os fatores diminuiu bastante.
+```{r}
+#Tenden
+N_Tenden <- Tenden
+N_Tenden[1:2,1] <- c(160,240)
+#Nova tabela da tendência:
+kable(N_Tenden)
+chisq.test(N_Tenden)
+```
+
+### Questão 29
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29.PNG")
+```
+```{r , echo=FALSE}
+Hom <- c(rep(10,3), rep(15,4), rep(20,3))
+Mul <- c(5, 10, 10, 5, 10, 10, 15, 10, 10, 15)
+Salario <- matrix(data =  c(Hom, Mul), nrow = 2, ncol = 10, byrow = TRUE, dimnames = list(c("Homem (X)", "Mulher (Y)"), seq(1,10)))
+```
+
+```{r , echo=FALSE, out.width = '35%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29_Dados.PNG")
+```
+```{r , echo=FALSE, out.width = '70%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29-a.PNG")
+```
+
+```{r}
+kable(Salario, format = "markdown")
+```
+```{r}
+#O salário anual médio dos homens é a soma dos salários (que foi fornecido, igual a 150), dividido pelo total de homens, 10. Média igual a:
+150/10
+
+#O Desvio Padrão (Populacional):
+sd(Salario[1,])*((length(Salario[1,])-1)/length(Salario[1,]))^(1/2)
+```
+
+
+```{r , echo=FALSE, out.width = '60%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29-b.PNG")
+```
+```{r}
+#O salário anual médio das mulheres é a soma dos salários (que foi fornecido, igual a 100), dividido pelo total de mulheres, 10. Média igual a:
+100/10
+
+#O Desvio Padrão (Populacional):
+sd(Salario[2,])*((length(Salario[2,])-1)/length(Salario[2,]))^(1/2)
+```
+
+
+
+```{r , echo=FALSE, out.width = '40%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29-c.PNG")
+```
+```{r}
+ggplot(data = NULL, aes(x = Salario[1,], y = Salario[2,])) +
+  geom_point(shape = 23, size = 2.5, fill = "maroon1") +
+  scale_y_continuous(limits = c(0,16), breaks = seq(0,16,2)) +
+  scale_x_continuous(limits = c(8,22), breaks = seq(8,22,2)) +
+  theme(panel.background = element_rect(fill = "white", colour = "black"), panel.grid.major.y = element_line(colour = "gray47", linetype = "longdash")) + labs(title = "Diagrama de Dispersão Sálarios", x = "Homem (X)", y = "Mulher (Y)")
+```
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29-d.PNG")
+```
+```{r}
+# OBS.: para o cálculo da correlação, pode-se utilizar a função "cor()" do R base, mas aqui ela vai ser feita de forma completa.
+#Exemplo da função "cor()"
+cor(Salario[1,], Salario[2,])
+```
+
+$$corr(X,Y)=\dfrac{\sum{x_iy_i}-n\bar{x}\bar{y}}{\sqrt{\left(   \sum{x_i^2} - n\bar{x}^2  \right) \cdot     \left(     \sum{y_i^2} - n\bar{y}^2    \right)}}.$$
+
+##### Relembrando dos itens **(a)** e **(b)** que $\bar{x}=15$ e $\bar{y}=10$ e também dados que a questão nos forneceu:
+```{r , echo=FALSE, out.width = '35%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29_Dados.PNG")
+```
+
+##### Podemos calcular a Correlação $(X,Y)$
+```{r}
+# "n" igual ao total de homens e/ou mulheres:
+length(Salario[1,])
+#   corr(X,Y):
+(1550 - (10*15*10))/((2400-(10*15^2)) * (1100 - (10*10^2)))^(1/2)
+```
+
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29-e.PNG")
+```
+
+*  Para a média, fazemos a soma dos salarios de todos os casais e dividimos pelo total de casais:
+```{r}
+#Salário médio familiar igual a:
+Med_Fam <- sum(Salario)/length(Salario[2,])
+Med_Fam
+```
+
+* Para a variância, fazemos a soma das distâncias ao quadrado de cada uma das observações à média (lembrando que, nesse caso, cada observação se refere à soma dos salários de cada casal) e dividimos pelo total de casais:
+```{r}
+# Foi utilizado como numéro de observações o total de mulheres, que é igual ao total de homens e, consequentemente, igual ao total de casais.
+
+# Variância do salário familiar igual a:
+sum((colSums(Salario) - Med_Fam)^2)/ length(Salario[2,])
+```
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_29-f.PNG")
+```
+
+*  Para podermos calcular a nova média, calculamos o novo salário dos homens e das mulheres após o desconto, e só assim foi tirada a média:
+```{r}
+#Salário médio familiar, após o desconto, igual a:
+Med_Descon <- ((sum(Salario[1,]*0.92)) + (sum(Salario[2,]*0.94))) /length(Salario[2,])
+Med_Descon
+```
+
+* Para a variância, fazemos a soma das distâncias ao quadrado de cada uma das observações à média (nesse caso, cada observação se refere à soma dos salários de cada casal feita após serem descontados os valores de $8\%$ e $6\%$) e dividimos pelo total de casais:
+```{r}
+# Variância do salário familiar, após o desconto, igual a:
+sum(((Salario[1,]*0.92) + (Salario[2,]*0.94) - Med_Descon)^2)/ length(Salario[1,])
+    
+```
+
+
+
+
+### Questão 30
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30.PNG")
+```
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-Variáveis.PNG")
+```
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-Tabela.PNG")
+```
+
+```{r , echo=FALSE}
+Dep_Ven <- data.frame(
+  "Vendedor" = 1:15, 
+  "T" = c(8,9,7,8,6,8,5,5,6,7,4,7,3,5,3), 
+  "E" = c(5,2,2,1,4,4,3,3,1,3,4,2,3,1,2), 
+  "G" = c("Bom","Bom","Mau","Mau","Bom","Bom","Bom","Bom","Mau","Mau","Bom","Mau","Mau","Mau","Bom"), 
+  "V" = c(54,50,48,32,30,30,29,27,24,24,24,23,21,21,16), 
+  "Z" = c("Norte","Sul","Sul","Oeste","Sul","Oeste","Norte","Norte","Oeste","Oeste","Sul","Norte","Sul","Oeste","Norte"), stringsAsFactors = FALSE)
+```
+
+```{r , echo=FALSE, out.width = '50%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-Dados.PNG")
+```
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-a.PNG")
+```
+
+```{r}
+#Departamento de Vendas
+kable(Dep_Ven, format = "markdown", align = 'crrcrc')
+```
+
+##### Histograma:
+```{r}
+ggplot(data = Dep_Ven, aes(x = V)) + geom_histogram(col = "mediumspringgreen", fill = "magenta1", breaks = seq(15,55,10)) +
+  scale_x_continuous(breaks = seq(15,55,10)) +
+  theme_classic() +
+  labs(title = "Histograma para a Variável V: vendas", x = "Vendas", y = "Frequência")
+```
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-b.PNG")
+```
+```{r}
+#Média:
+Med_Ger <- mean(Dep_Ven$V)
+Med_Ger
+
+#Variância (Populacional):
+Varian <- var(Dep_Ven$V)*((length(Dep_Ven$V)-1)/length(Dep_Ven$V))
+Varian
+
+#Vamos calcular se algum valor fica acima de dois desvios padrões superior à media geral:
+Dep_Ven$V[Dep_Ven$V>Med_Ger + 2*(Varian^(1/2))]
+
+#Como obtivemos apenas um valor, então temos somente um vendedor excepcional, que é o vendedor número 1, como  se pode coomprovar:
+Dep_Ven$Vendedor[Dep_Ven$V>Med_Ger + 2*(Varian^(1/2))]
+```
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-c.PNG")
+```
+
+*  Vamos primeiramente calcular o 1º quartil, isto é, $q(0,25)$:
+```{r}
+quantile(Dep_Ven$V, probs = 0.25)
+```
+
+*  Como o $q(0,25) = 23,5$, chegamos à conclusão de que um vendedor tem que realizar um mínimo de $24 \hspace{3mm} vendas$ para não ser transferido.
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-d.PNG")
+```
+
+*  Pode-se perceber, a partir da análise dos Box Plots, que as distribuições das diferentes zonas de venda não são semelhantes e, portanto, o argumento dos vendedores é cabível, pois, tendo em vista a diferença entre os gráficos, esse critério não é justo.
+```{r}
+ggplot(data = Dep_Ven, aes(x = Z, y = V)) +
+  geom_boxplot(col = "steelblue",fill = "olivedrab1", outlier.shape = 8, outlier.colour = "red", outlier.size = 2) +
+  theme_classic() + 
+  labs(title = "Box Plots das Vendas por Zona", x = "Zona", y = "Total de Vendas")
+```
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-e.PNG")
+```
+
+#####  Levando em consideração que a variável $G: conceito  \hspace{3mm} do \hspace{3mm} gerente$ é baseada nas variáveis $T: teste$ e $E: experiência$, vamos procurar alguma relação de dependência nas variáveis $T$ e $E$ que, de alguma forma, reflita na variável $V: vendas$. Pensando nisso, vamos realizar o cálculo da correlação.
+
+
+
+##### Vamos recordar os dados que a questão nos forneceu, eles serão bem úteis para realizar os calculos.
+```{r , echo=FALSE, out.width = '50%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-Dados.PNG")
+```
+
+  *  Primeiramente, calculando a correlação entre $T$ e $V$:
+
+$$corr(T,V)=\dfrac{\sum{t_iv_i}-n\bar{t}\bar{v}}{\sqrt{\left(   \sum{t_i^2} - n\bar{t}^2  \right) \cdot     \left(     \sum{v_i^2} - n\bar{v}^2    \right)}}.$$
+```{r}
+# Temos que a correlação entre o Teste e o Número de vendas é:
+(2959 - (15*(91/15)*(453/15))) / (((601 - (15*((91/15)^2)))*(15509 - 15*((453/15)^2)))^(1/2))
+```
+
+  *  Depois, calculamos a correlação entre $E$ e $V$:
+
+$$corr(E,V)=\dfrac{\sum{e_iv_i}-n\bar{e}\bar{v}}{\sqrt{\left(   \sum{e_i^2} - n\bar{e}^2  \right) \cdot     \left(     \sum{v_i^2} - n\bar{v}^2    \right)}}.$$
+```{r}
+# Temos que a correlação entre os Anos de Experiência e o Número de vendas é:
+(1260 - (15*(40/15)*(453/15))) / (((128 - (15*((40/15)^2)))*(15509 - (15*((453/15)^2))))^(1/2))
+```
+
+```{r}
+# Conclusão
+```
+
+*  Dessa forma, a partir das correlações entre as váriaveis, com $0,2632924 \lt 0,704746$ $\iff$ $Experiência \lt Teste$, podemos afirmar que a Variável $T: teste$ exerce mais influência na variável $V: vendas$, ou seja, no número de vendas do vendedor. Desse modo, a variável $T: teste$ é a mais importante para julgar um futuro candidato ao emprego.
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-f.PNG")
+```
+
+   * Vamos usar como  medida de associação, o $\chi^2$:
+```{r , warning=FALSE}
+chisq.test(Dep_Ven$G, Dep_Ven$Z)
+```
+
+ *  Obtivemos um $\chi^2$ de $\approx 3,75$, o que nos diz que há pouca relação entre as variáveis $G: conceito  \hspace{3mm} do \hspace{3mm} gerente$ e $Z: zona$. Essa baixa relação pode significar que o gerente não leva em consideração a sua avaliação do vendedor no momento de designá-lo à uma zona qualquer.   
+
+
+
+```{r , echo=FALSE, out.width = '80%'}
+knitr::include_graphics("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 3/Questões/Capítulo 4/Questão_30-g.PNG")
+```
+
+##### Para medir o grau, vamos utilizar o cálculo do $\chi^2$.
+
+  *  Para as Variáveis $G: conceito  \hspace{3mm} do \hspace{3mm} gerente$ e $T: teste$, temos uma baixa associação, com $\chi^2 \approx 5.625$.
+  
+```{r , warning=FALSE}
+chisq.test(Dep_Ven$G, Dep_Ven$T)
+```
+
+  *  Já para as Variáveis $Z: zona$ e $V: vendas$ obtivemos um $\chi^2 \approx 20$, o que nos dá um grau considerável de associação entre esses dois fatores. O que corrobora com a revolta dos vendedores observada no $item \hspace{3mm} (d)$.
+  
+```{r , warning=FALSE}
+chisq.test(Dep_Ven$Z, Dep_Ven$V)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
