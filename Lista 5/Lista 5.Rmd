@@ -1,0 +1,479 @@
+---
+title: "Lista 5"
+author: "Germano Andrade Brandão - 2017080008"
+date: "02/06/2020"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(dplyr)
+library(patchwork)
+library(gtable)
+library(plotly)
+library(tidyverse)
+library(ggplot2)
+library(ggrepel)
+library(scales)
+library(tidyr)
+library(ggrepel)
+library(grid)
+library(lubridate)
+library(ggmap)
+library(ggrepel)
+library(gridExtra)
+library(pander)
+library(knitr)
+library(devtools)
+library(RCurl)
+library(httr)
+library(Rcpp)
+library(reshape)
+library(gapminder)
+library(png)
+library(gganimate)
+library(gifski)
+options(tinytex.verbose = TRUE)
+```
+
+
+## 1 - The Economist
+
+```{r the_economist, include=FALSE}
+dat <- read.csv("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 4/Rgraphics/dataSets/EconomistData.csv")
+
+pc1 <- ggplot(dat, aes(x = CPI, y = HDI, color = Region))
+
+pc1 + geom_point()
+
+
+##################################################################################################
+
+#### Adicionando uma linha de tendência:
+pc2 <- pc1 + 
+  geom_smooth(mapping = aes(linetype = "r2"), #Aqui é usado o coeficiente de determinação(r^2) para o tipo da linha.
+              method = "lm",
+              formula = y ~ x + log(x), se = FALSE,
+              color = "red")
+
+#Nesse ponto, foi alterado a forma dos pontos, para que virassem uma circunferência e modificado os seus tamanhos e a espessura das bordas.
+(pc3 <- pc2 + geom_point(shape = 1, size = 2.5, stroke = 1.25))
+
+################################################################################################
+
+#### Escolhendo os pontos que devem aparecer no gráfico:
+#Agora, baseando-se no gráfico original, foi selecionado os países que vão ser destacados frente aos demais, e então foram guardados em uma variável.
+
+pointsToLabel <- c("Russia", "Venezuela", "Iraq", "Myanmar", "Sudan",
+                   "Afghanistan", "Congo", "Greece", "Argentina", "Brazil",
+                   "India", "Italy", "China", "South Africa", "Spane",
+                   "Botswana", "Cape Verde", "Bhutan", "Rwanda", "France",
+                   "United States", "Germany", "Britain", "Barbados", "Norway", "Japan",
+                   "New Zealand", "Singapore")
+
+#################################################################################################
+
+#Detalhe para a função 'filter' da biblioteca "dplyr" que é usado para adicionar ao gráfico apenas os países que estiverem na variável 'pointsToLabel' criada há pouco.
+#Além disso, foi utilizada nesse ponto a biblioteca "ggrepel" para corrigir a posição do nome dos países que estavam gerando conflito no gráfico.
+(pc4 <- pc3 +
+  geom_text_repel(aes(label = Country),
+            color = "ivory",
+            data = filter(dat, Country %in% pointsToLabel), 
+            force = 10))
+
+##############################################################################################
+
+#### Mudar a ordem e o rótulo da região:
+
+dat <- read.csv("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 4/Rgraphics/dataSets/EconomistData.csv")
+#Foi alterada dentro da tabela o nome de cada região e o nível de ordem (já que a variáve região é do tipo 'factor').
+dat$Region <- factor(dat$Region,
+                     levels = c("EU W. Europe",
+                                "Americas",
+                                "Asia Pacific",
+                                "East EU Cemt Asia",
+                                "MENA",
+                                "SSA"),
+                     labels = c("OECD",
+                                "Americas",
+                                "Asia &\nOceania",
+                                "Central &\nEastern Europe",
+                                "Middle East &\nnorth Africa",
+                                "Sub-Saharan\nAfrica"))
+
+################################################################################################
+
+#Nesse ponto o que se faz é "atualizar" os dados do gráfico, uma vez que eles foram modificados. O 'pc4' havia herdado desde o 'pc1'  o "ggplot(data = dat,...)", então foi preciso colocar o 'dat' modificado sem precisar repetir todo o processo.
+
+pc4$data <- dat
+pc4
+
+mR2 <- summary(lm(HDI ~ CPI + log(CPI), data = dat))$r.squared
+mR2 <- paste0(format(mR2, digits = 2), "%")
+
+################################################################################################
+
+the_economist <- pc4 +
+  scale_x_continuous(name = "Corruption Perceptions Index, 2011 (10=least corrupt)",
+                     limits = c(.9, 10.5),
+                     breaks = 1:10) +
+  scale_y_continuous(name = "Human Development Index, 2011 (1=Best)",
+                     limits = c(0.2, 1.0),
+                     breaks = seq(0.2, 1.0, by = 0.1)) + 
+  theme_minimal() + # start with a minimal theme and add what we need
+  theme(text = element_text(color = "gray20"),
+        legend.position = "top", # position the legend in the upper left 
+        legend.direction = "horizontal", 
+        legend.box = "horizontal",
+        legend.justification = 0.1, # anchor point for legend.position.
+        legend.text = element_text(size = 9, color = "gray10"),
+        plot.title = element_text(size = 16, face = "bold"),
+        axis.text = element_text(face = "italic"),
+        axis.title.x = element_text(vjust = -1, face = "italic"), # move title away from axis
+        axis.title.y = element_text(vjust = 2, face = "italic"), # move away for axis
+        axis.ticks.y = element_blank(), # element_blank() is how we remove elements
+        axis.line = element_line(color = "gray40", size = 0.5),
+        axis.line.y = element_blank(),
+        panel.background = element_rect(fill = "gray55"),
+        panel.grid = element_blank(),
+        panel.grid.major = element_line(color = "gray50", size = 0.5),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(color = "gray")) + 
+  scale_linetype(name = "", breaks = "r2", labels = list(bquote(R^2==.(mR2))), guide = guide_legend(override.aes = list(linetype = 1, size = 2, color = "red"), order = 2)) + 
+  ggtitle("Corruption and Human development") + 
+  labs(caption = "\nSources: Transparency International; UN Human Development Report\nReproduced by Germano Andrade")
+
+#ggsave("Teste_teste_the_economist.pdf", plot = save1, device = "pdf", width = 7.3, height = 5.4)
+
+
+#################################################################################################
+
+the_economist + scale_color_manual(name = "",
+                     values = c("#24576D",
+                                "#099DD7",
+                                "#28AADC",
+                                "#248E84",
+                                "#F2583F",
+                                "#96503F"),
+                     guide = guide_legend(nrow = 1, order = 1))
+```
+
+
+* Para esse gráfico, as alterações mais relevantes são referentes às $\textcolor{red}{c}\textcolor{orange}{o}\textcolor{yellow}{r}\textcolor{green}{e}\textcolor{blue}{s}$, que foram alteradas tanto nas que representam cada parte dos países, como no fundo do gráfico.
+```{r, fig.width=7.93, fig.height=5.86}
+(save1 <- the_economist + scale_color_manual(name = "",
+                     values = c("cyan3",
+                                "maroon2",
+                                "green2",
+                                "#F2580C",
+                                "tomato4",
+                                "#ffff33"),
+                     guide = guide_legend(nrow = 1, order = 1)))
+```
+```{r, include=FALSE}
+ggsave("ggplot_The_Economist.pdf", plot = save1, device = "pdf", width = 7.93, height = 5.86)
+```
+\newpage
+
+# 2 - Minard
+
+```{r minard, include=FALSE}
+cities <- read.table("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 4/cities.txt",
+                     header = TRUE, stringsAsFactors = FALSE)
+
+troops <- read.table("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 4/troops.txt",
+                     header = TRUE, stringsAsFactors = FALSE)
+
+#A função 'mutate' foi usada para colocar a data em um formato adequado, sinalizando que possui dia, mês e ano (dmy).
+temps <- read.table("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 4/temps.txt",
+                    header = TRUE, stringsAsFactors = FALSE) %>% 
+    mutate(date = dmy(date))
+
+##################################################################################################
+
+p1 <- ggplot() + geom_path(data = troops, aes(x = long, y = lat, group = group, color = direction, size = survivors), lineend = "round")  + 
+  geom_segment(aes(x=35.2, xend =35.7, y = 55.6, yend = 55.3, linetype = "Rio"),size = 1.06, color = "cyan")+
+  geom_segment(aes(x=23.9, xend =24.15, y = 55.4, yend = 54.75),size = 1.06, color = "cyan")+
+  geom_segment(aes(x=30.4, xend =31.2, y = 54.3, yend = 54.6),size = 1.06, color = "cyan")+
+  geom_segment(aes(x=28.5, xend =29, y = 54.5, yend = 54.1),size = 1.06, color = "cyan") +
+  theme(legend.title = element_blank()) + 
+  scale_size(range = c(0.5, 10))
+
+p2 <- p1 + 
+  scale_colour_manual(values = c("lightgoldenrod3", "gray13")) + 
+  labs(x = NULL, y = NULL) + 
+  guides(color = FALSE, size = FALSE)
+
+p3 <- p2 + 
+  geom_point(data = cities, aes(x = long, y = lat), color = "tomato") + 
+  geom_text_repel(data = cities, aes(x = long, y = lat, label = city), color = "tomato") +
+   theme_void() +
+  theme(legend.title = element_blank(), legend.position = "top")
+
+#################################################################################################
+temps <- mutate(temps, label = paste0(temp, ".° le ", month, " ", day))
+
+t1 <- ggplot(data=temps, aes(x=long, y=temp)) +
+    geom_path(aes(color = temp, size=temp), lineend = "round") +
+    geom_point(size=3, color = "tomato") + 
+  scale_color_continuous(name="",
+                         low = "turquoise1", high = "navy") + 
+  geom_label_repel(aes(label=label, fill = temp), color = "white", size=2.6, segment.color = "tomato", nudge_y = -2, force = 20) + 
+  guides(color = FALSE, fill = FALSE, size = FALSE)
+
+t2 <- t1 + 
+  coord_cartesian(xlim = c(24, 38), ylim = c(-35, 5)) +
+  labs(x = NULL, y="° Celsius") + 
+  scale_y_continuous(position = "right") + 
+  theme_bw() +
+  theme(panel.grid.major.x = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        panel.grid.minor.y = element_blank(),
+        axis.text.x = element_blank(), axis.ticks = element_blank(),
+        panel.border = element_blank())
+```
+
+* Já para o gráfico do Minard, devido à obra-prima que é, foi bem difícil implementar alguma coisa que melhore a visualização. Por esse motivo, as adições feitas foram as de sinalizar em azul os rios na rota das tropas e adicionar cor e tamanho - ao gráfico das temperaturas - respectivos às temperaturas registradas no período.
+
+```{r, echo=FALSE, fig.height = 4.7, fig.width = 8}
+grid.arrange(p3, t2, nrow=2, heights=c(3.5, 1.2), top = "Minard Plot")
+grid.rect(width = .99, height = .99, gp = gpar(lwd = 2, col = "turquoise4", fill = NA))
+```
+
+```{r, include=FALSE}
+save2 <- grid.arrange(p3, t2, nrow=2, heights=c(3.5, 1.2), top = "Minard Plot")
+ggsave("ggplot_Minard.pdf", plot = save2, device = "pdf", width = 8, height = 4.7)
+```
+\newpage
+
+
+# 3 - Gapminder
+```{r gapminder, include=FALSE}
+population_csv <- read.csv2("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 4/indicator gapminder population.CSV", sep = ";", stringsAsFactors = FALSE)
+
+fertility_csv <- read.csv2("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 4/indicator undata total_fertility.CSV", sep = ";", stringsAsFactors = FALSE)
+
+lifeexp_csv <- read.csv2("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 4/indicator life_expectancy_at_birth.CSV", sep = ";", stringsAsFactors = FALSE)
+
+################################################################################################
+
+myvars <- paste("X", 1962:2015, sep="")
+
+#Agora vamos usar nossa variável para selecionar apenas as colunas correspondentes aos anos que a gente quer.
+population <- population_csv %>% select(Total.population, all_of(myvars))
+fertility <- fertility_csv %>% select(Total.fertility.rate, all_of(myvars))
+lifeexp <- lifeexp_csv %>% select(Life.expectancy, all_of(myvars))
+
+###############################################################################################
+
+
+#Renomeando a primeira coluna de todas as tabelas para "Country".
+colnames(population)[1] <- "Country"
+colnames(fertility)[1] <- "Country"
+colnames(lifeexp)[1] <- "Country"
+
+#Temos que remover as linhas vazias que foram criadas. Para isso, vamos manter apenas as primeiras 275 linhas de duas tabelas que precisam disso.
+lifeexp <- lifeexp[1:275,]
+population <- population[1:275,]
+
+###############################################################################################
+
+#Vamos usar uma função da biblioteca "reshape" para transformar as colunas dos anos em linhas após o nome de cada país.
+population_m <- melt(population, id=c("Country")) 
+lifeexp_m <- melt(lifeexp, id=c("Country")) 
+fertility_m <- melt(fertility, id=c("Country"))
+
+################################################################################################
+
+#Vamos nomear as nossas novas colunas criadas, que agora funcionam como indicador.
+colnames(population_m)[3] <- "pop"
+colnames(lifeexp_m)[3] <- "life"
+colnames(fertility_m)[3] <- "fert"
+
+#Transformando as três tabelas em apenas uma, com a função 'merge' juntando duas por vez.
+mydf <- merge(lifeexp_m, fertility_m, by=c("Country","variable"), header =T)
+mydf <- merge(mydf, population_m, by=c("Country","variable"), header =T)
+
+###############################################################################################
+
+#Para poder mapear cada país por continente usando cores diferentes para identificarmos cada continente, vamos usar a biblioteca "gapminder":
+continent <- gapminder %>% group_by(continent, country) %>% distinct(country, continent)
+continent <- data.frame(lapply(continent, as.character), stringsAsFactors=FALSE)
+colnames(continent)[1] <- "Country"
+
+#Vamos usar o "dplyr" para filtrar nossa tabela 'mydf' e fazer com que ela contenha apenas os países que existem na tabela 'continent' do "gapminder":
+mydf_filter <- mydf %>% filter(Country %in% unique(continent$Country))
+
+#E então vamos juntar as tabelas 'continent' e 'mydf_filter' para que adicionemos os países aos respectivos continentes a que pertencem:
+mydf_filter <- merge(mydf_filter, continent, by=c("Country"), header =T)
+
+################################################################################################
+
+#Por fim, vamos fazer um último trabalho de limpeza, tais como remoção de valores coagidos como NA, transformar variáveis do tipo "Factor", etc..
+
+#Eliminando os NA's
+mydf_filter[is.na(mydf_filter)] <- 0
+
+#Alterando a coluna 'variable' de modo a remover a letra "X" antes do ano e depois transformá-lo em um número inteiro.
+mydf_filter$variable <- as.integer(as.character(gsub("X","",mydf_filter$variable)))
+
+#Mudar seu nome para "year".
+colnames(mydf_filter)[colnames(mydf_filter)=="variable"] <- "year"
+
+#Ao invés de pegarmos a população total, vamos trabalhar com a população por milhões de habitantes e apenas uam casa decimal:
+mydf_filter$pop <- round(as.numeric(as.character(mydf_filter$pop))/1000000,1)
+
+#################################################################################################
+
+# Criar um tema global para o nosso 'plot'
+theme_set(theme_grey()+ theme(legend.box.background = element_rect(),legend.box.margin = margin(6, 6, 6, 6)) )
+```
+
+* Após tentar usar transparência nos pontos para representar a passagem dos anos e não ter um resultado satisfatório, decidi selecionar apenas alguns anos de forma a representar uma boa transição. Então, criei um recorte contendo apenas \large 6 anos \normalsize com espaçamento mais ou menos igual entre eles.
+```{r}
+(recorte <- round(seq(1962,2015,length.out = 6),0))
+```
+
+
+```{r gapminder_2, include=FALSE}
+gap <- ggplot(data = NULL, aes(fert, life, size = pop, color = continent, frame = year)) +
+  labs(title = "Gapminder (estático)", x="Fertility Rate", y = "Life expectancy at birth (years)",
+       caption = "(Based on data from Hans Rosling - gapminder.com)\nReproduced by Germano Andrade",
+       color = 'Continent',size = "Population (millions)") + 
+  ylim(30,90) +
+  scale_size(range = c(1.4,8.4)) + 
+  theme(legend.position = "top", 
+        legend.direction = "vertical",
+        panel.background = element_rect(fill = "lightskyblue4"),
+        rect = element_rect(fill = "ghostwhite"),
+        legend.background = element_rect(fill = "lightskyblue4"),
+        legend.text = element_text(colour = "white"),
+        legend.title = element_text(colour = "ivory", face = "bold"),
+        plot.title = element_text(color = "gray0", face = "bold")) +
+  scale_color_brewer(type = 'div', 
+                     palette = 'Spectral')
+```
+
+\vspace{0.5cm}
+
+* E então, eu usei a função \textit{"facet\_wrap()"} do \textit{ggplot2} para separar os plots de acordo com os seis anos que foram determinados no recorte. As cores dos pontos foram mantidas as mesmas porque as tentativas de mudanças não ficaram melhores que a original e também para preservar os traços do gráfico antigo.
+
+```{r, warning=FALSE, fig.width=7.3, fig.height=9.3}
+(save3 <- gap +
+  geom_point(data = filter(mydf_filter, year %in% recorte)) + 
+  facet_wrap(.~year, as.table = FALSE))
+```
+```{r, include=FALSE}
+ggsave("ggplot_Gapminder.pdf", plot = save3, device = "pdf", width = 7.3, height = 9.3)
+```
+
+\newpage
+
+# 4 - Atirei O Pau No Gráfico
+
+
+```{r, include=FALSE}
+brasil_reg <- read.csv("C:/Graduação - Data Science/Análise Explorátoria de Dados e Visualização/Lista 5/Previsão_Covid.CSV", sep = ";", stringsAsFactors = FALSE)
+
+brasil_reg <- brasil_reg %>% filter(obitosAcumulado != 0)
+
+col_dados <- c("2020-03-25", "2020-03-26", "2020-03-27", "2020-03-28", "2020-03-29", "2020-03-30", "2020-03-31", "2020-04-01", "2020-04-02", "2020-04-03", "2020-04-04", "2020-04-05",
+ "2020-04-06", "2020-04-07", "2020-04-08", "2020-04-09", "2020-04-10", "2020-04-11",
+ "2020-04-12", "2020-04-13", "2020-04-14", "2020-04-15", "2020-04-16", "2020-04-17",
+ "2020-04-18", "2020-04-19", "2020-04-20", "2020-04-21", "2020-04-22", "2020-04-23",
+ "2020-04-24", "2020-04-25", "2020-04-26", "2020-04-27", "2020-04-28", "2020-04-29",
+ "2020-04-30", "2020-05-01", "2020-05-02", "2020-05-03", "2020-05-04", "2020-05-05",
+ "2020-05-06", "2020-05-07", "2020-05-08", "2020-05-09", "2020-05-10", "2020-05-11",
+ "2020-05-12", "2020-05-13", "2020-05-14", "2020-05-15", "2020-05-16", "2020-05-17",
+ "2020-05-18", "2020-05-19", "2020-05-20", "2020-05-21", "2020-05-22", "2020-05-23",
+ "2020-05-24", "2020-05-25", "2020-05-26", "2020-05-27", "2020-05-28", "2020-03-17",
+ "2020-03-18", "2020-03-19", "2020-03-20", "2020-03-21", "2020-03-22", "2020-03-23",
+ "2020-03-24")
+
+###############################################################################################
+```
+
+
+```{r, include=FALSE}
+sars_cov_2 <- ggplot(filter(brasil_reg, data %in% col_dados), aes(x = data, y = obitosAcumulado, group = regiao)) + 
+  geom_point(aes(color = regiao)) +
+  geom_path(aes(color = regiao)) +
+  scale_y_continuous(trans = 'log10') +
+  scale_x_discrete(breaks = c("2020-03-20", "2020-04-01", "2020-04-15", "2020-05-01", "2020-05-15", "2020-05-28"), labels = c("20 de Março", "1º de Abril", "15 de Abril", "1º de Maio", "15 de Maio", "28 de Maio")) + 
+  theme_light() + 
+  theme(text = element_text(color = "gray20"),
+        legend.text = element_text(size = 9, color = "gray30"),
+        plot.title = element_text(size = 16, face = "bold"),
+        axis.text = element_text(face = "italic"),
+        axis.title.x = element_text(vjust = -1, face = "italic"),
+        axis.title.y = element_text(vjust = 2, face = "italic")) + 
+  scale_linetype(name = "", guide = guide_legend(override.aes = list(linetype = 1, size = 2, color = "red"), order = 2)) + 
+  labs(caption = "(https://covid.saude.gov.br/)\nRetrieved on 28 May 2020.
+       Produced by Germano Andrade")
+
+sars_Cov_2 <- ggplot(brasil_reg, aes(x = data, y = obitosAcumulado, group = regiao)) + 
+  geom_point(aes(color = regiao)) +
+  geom_path(aes(color = regiao)) +
+  scale_y_continuous(trans = 'log10') +
+  scale_x_discrete(breaks = c("2020-03-20", "2020-04-01", "2020-04-15", "2020-05-01", "2020-05-15", "2020-05-28", "2020-06-15"), labels = c("20 de Março", "1º de Abril", "15 de Abril", "1º de Maio", "15 de Maio", "28 de Maio", "15 de Junho")) + 
+  theme_light() + 
+  theme(text = element_text(color = "gray20"),
+        legend.text = element_text(size = 9, color = "gray30"),
+        plot.title = element_text(size = 16, face = "bold"),
+        axis.text = element_text(face = "italic"),
+        axis.title.x = element_text(vjust = -1, face = "italic"),
+        axis.title.y = element_text(vjust = 2, face = "italic")) + 
+  scale_linetype(name = "", guide = guide_legend(override.aes = list(linetype = 1, size = 2, color = "red"), order = 2)) + 
+   scale_color_manual(name = "Regiões",
+                     values = c("#F8766D",
+                                "#A3A500",
+                                "#00BF7D",
+                                "#00B0F6",
+                                "#E76BF3")) + 
+  labs(title = "Total de Óbitos Acumulados (por região)",
+       x = "Data", 
+       y = "Óbitos Acumulados\n(Escala logarítimica)", 
+       caption = "(https://covid.saude.gov.br/)\nRetrieved on 28 May 2020.
+       Produced by Germano Andrade")
+```
+
+* Para esse gráfico, decidi testar a visualização dos dados em relação a cada região, e ficou assim:
+```{r, fig.width=7.93, fig.height=4.7}
+(save4 <- sars_cov_2 + 
+   scale_color_manual(name = "Regiões",
+                     values = c("#F8766D",
+                                "#A3A500",
+                                "#00BF7D",
+                                "#00B0F6",
+                                "#E76BF3")) + 
+  labs(title = "Total de Óbitos Acumulados", 
+       x = "Data", 
+       y = "Óbitos Acumulados\n(Escala logarítimica)"))
+```
+
+```{r, include=FALSE}
+ggsave("ggplot_Covid.pdf", plot = save4, device = "pdf", width = 7.93, height = 4.7)
+```
+
+* Além disso, decidi fazer uma previsão do número de óbitos acumulados até o dia \textbf{15 de Junho}:
+```{r, fig.width=7.93, fig.height=5}
+(save5 <- sars_Cov_2 + 
+  geom_line(aes(x="2020-05-28", 
+            linetype = "\nData da\nColeta\ndos Dados"),
+            color = "red", 
+            size = 1) + 
+  labs(subtitle = "Previsão para os próximos 15 dias do número de casos
+acumulados de óbitos pela Sars-CoV-2."))
+```
+
+```{r, include=FALSE}
+ggsave("ggplot_Covid_2.pdf", plot = save5, device = "pdf", width = 7.93, height = 5)
+saveWidget <- ggplotly(save5, width =  1114, height= 650)
+htmlwidgets::saveWidget(saveWidget, "plotly_Covid_2.html")
+```
+
+
+
+
+
+
