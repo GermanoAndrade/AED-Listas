@@ -1,5 +1,5 @@
-# AED-Listas ![FGV EMAp](https://raw.githubusercontent.com/GermanoAndrade/AED-Listas/main/Lista%203/Quest%C3%B5es/Cap%C3%ADtulo%204/FGV-EMAp.png)
-Course assignments of Exploratory Data Analysis and Visualization.
+# AED-Listas <img align="right" src="https://raw.githubusercontent.com/GermanoAndrade/AED-Listas/main/Lista%203/Quest%C3%B5es/Cap%C3%ADtulo%204/FGV-EMAp.png" title="FGV-EMAp Logo" width="209" height="89">
+*Course assignments of Exploratory Data Analysis and Visualization.*
 
 ### :bookmark_tabs:Brief description
 Exploratory Data Analysis and Visualization is a discipline of the first period of the graduation in Data Science at FGV (taught in 2020).
